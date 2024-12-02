@@ -1,7 +1,7 @@
 # PEC3_VISUALIZACION
 StoryTelling sobre un conjunto de datos de un Hotel City (H1) y Hotrl Resort (H2).
 # ENLACE VISUALIZACIÓN
-
+[Impacto de las decisiones de los huéspedes](https://ipf97.shinyapps.io/StoryTellingApp/)
 # CONTENIDO DEL REPOSITORIO
 * **LICENSE**:    Apache License Version 2.0, January 2004
 * **mainApp.R**: archivo con el codigo R para ejecutar el RMarckdown con las diferentes visualizaciones realizadas para el desarrolo de la historia con Shiny.
