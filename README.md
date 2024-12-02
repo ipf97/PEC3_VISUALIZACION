@@ -1,5 +1,5 @@
 # PEC3_VISUALIZACION
-StoryTelling sobre un conjunto de datos de un Hotel City (H1) y Hotrl Resort (H2).
+StoryTelling sobre un conjunto de datos de un City Hotel (H1) y Resort Hotel (H2).
 # ENLACE VISUALIZACIÓN
 [Impacto de las decisiones de los huéspedes](https://ipf97.shinyapps.io/StoryTellingApp/)
 # CONTENIDO DEL REPOSITORIO
