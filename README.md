@@ -7,7 +7,7 @@ StoryTelling sobre un conjunto de datos de un City Hotel (de Lisboa) y Resort Ho
 
 * **Estática**
 
-  [Impacto de las decisiones de los huéspedes, en formato estático](https://ipf97.github.io/PEC3_VISUALIZACION/StoryTelling_Estatica.html#5_El_cliente_invisible)
+  [Impacto de las decisiones de los huéspedes, en formato estático](https://ipf97.github.io/PEC3_VISUALIZACION/StoryTelling_Estatica.html)
 
 # CONTENIDO DEL REPOSITORIO
 * **LICENSE**:    Apache License Version 2.0, January 2004
