@@ -2,8 +2,12 @@
 StoryTelling sobre un conjunto de datos de un City Hotel (H1) y Resort Hotel (H2).
 # ENLACE VISUALIZACIÓN
 * **Interactiva**
+  
 [Impacto de las decisiones de los huéspedes](https://ipf97.shinyapps.io/StoryTellingApp/)
+
 * **Estática**
+
+
 
 # CONTENIDO DEL REPOSITORIO
 * **LICENSE**:    Apache License Version 2.0, January 2004
