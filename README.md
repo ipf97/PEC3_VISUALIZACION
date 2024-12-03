@@ -3,7 +3,7 @@ StoryTelling sobre un conjunto de datos de un City Hotel (H1) y Resort Hotel (H2
 # ENLACE VISUALIZACIÓN
 * **Interactiva**
   
-[Impacto de las decisiones de los huéspedes](https://ipf97.shinyapps.io/StoryTellingApp/)
+  [Impacto de las decisiones de los huéspedes](https://ipf97.shinyapps.io/StoryTellingApp/)
 
 * **Estática**
 
