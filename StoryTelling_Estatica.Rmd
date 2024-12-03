@@ -1,0 +1,470 @@
+---
+title: "PEC3 Storytelling: Impacto de las decisiones de los huéspedes"
+author: "Imanol Pérez Fernández"
+date: "`r Sys.Date()`"
+output:
+   html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Datos
+
+```{r}
+library(readr)
+hotel_bookings_1 <- read_csv("hotel_bookings_1.csv")
+```
+
+# Introducción
+
+Este análisis explora patrones en reservas hoteleras basados en datos de un hotel urbano en Lisboa y un resort en la región del Algarve. Utilizamos diversas técnicas de visualización para revelar insights sobre cancelaciones, patrones estacionales y comportamiento del cliente.
+
+# Dos mundos, una historia
+
+```{r}
+# Cargar las librerías necesarias
+library(ggplot2)
+library(dplyr)
+library(treemapify)
+
+# Preparar los datos iniciales para cada tipo de hotel
+treemap_data <- hotel_bookings_1 %>%
+  group_by(hotel, market_segment) %>%
+  summarise(reservations = n(), .groups = "drop")
+
+# Crear gráfico para City Hotel
+city_data <- treemap_data %>% filter(hotel == "City Hotel")
+
+city_treemap <- ggplot(city_data, aes(
+  area = reservations,
+  fill = market_segment,
+  label = paste(market_segment, "\n", reservations)
+)) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", place = "centre", grow = TRUE, reflow = TRUE) +
+  labs(
+    title = "Distribución de reservas: City Hotel",
+    subtitle = "Segmentos de mercado",
+    fill = "Segmento de mercado"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    legend.position = "bottom",
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 10)
+  )
+
+# Crear gráfico para Resort Hotel
+resort_data <- treemap_data %>% filter(hotel == "Resort Hotel")
+
+resort_treemap <- ggplot(resort_data, aes(
+  area = reservations,
+  fill = market_segment,
+  label = paste(market_segment, "\n", reservations)
+)) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", place = "centre", grow = TRUE, reflow = TRUE) +
+  labs(
+    title = "Distribución de reservas: Resort Hotel",
+    subtitle = "Segmentos de mercado",
+    fill = "Segmento de mercado"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    legend.position = "bottom",
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 10)
+  )
+
+# Mostrar los gráficos individualmente
+print(city_treemap)
+print(resort_treemap)
+```
+
+
+
+
+En este caso de estudio hotelero, dos tipos de alojamientos: City Hotel, dominados por viajeros urbanos que prefieren plataformas digitales como OTAs (Online Travel Agencies) (32475 reservas), y los Resort Hotels, enfocados en experiencias de ocio y planificación anticipada, con una distribución más equilibrada entre OTAs (16003), Offline TA/TO (7004) y Direct (5966). Mientras el City Hotel destacan en segmentos corporativos y grupos con alta dependencia de canales digitales, el Resort Hotel prioriza una experiencia personalizada y grupal para eventos y vacaciones. Estas diferencias reflejan cómo cada tipo de hotel adapta su estrategia a las necesidades de sus huéspedes.
+
+# El fantasma de las cancelaciones
+
+```{r}
+# Cargar las librerías necesarias
+library(dplyr)       
+library(ggplot2)    
+library(ggbeeswarm)  
+library(patchwork)   
+
+# Verificar que las columnas utilizadas son del tipo correcto
+hotel_bookings_1 <- hotel_bookings_1 %>%
+  mutate(
+    lead_time = as.numeric(lead_time),
+    deposit_type = as.factor(deposit_type),
+    market_segment = as.factor(market_segment)
+  )
+
+# Preparar los datos para City Hotel
+cancel_data_city <- hotel_bookings_1 %>%
+  filter(hotel == "City Hotel", is_canceled == 1)
+
+cancel_plot_city <- ggplot(cancel_data_city, aes(
+  y = deposit_type, x = lead_time, color = market_segment
+)) +
+  geom_beeswarm(alpha = 0.6, size = 2) +
+  labs(
+    title = "Densidad de cancelaciones: City Hotel",
+    subtitle = "Por depósito, segmento de mercado y tiempo de cancelación",
+    x = "Tiempo anticipado en Días", 
+    y = "Tipo de Depósito"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    legend.text = element_text(size = 9),
+    axis.text.y = element_text(angle = 45, hjust = 1, size = 8),
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5), # Centra el título
+    plot.subtitle = element_text(size = 12, hjust = 0.5) # Centra el subtítulo
+  ) +
+  scale_y_discrete(expand = expansion(mult = c(0.2, 0.2)))
+
+# Preparar los datos para Resort Hotel
+cancel_data_resort <- hotel_bookings_1 %>%
+  filter(hotel == "Resort Hotel", is_canceled == 1)
+
+cancel_plot_resort <- ggplot(cancel_data_resort, aes(
+  y = deposit_type, x = lead_time, color = market_segment
+)) +
+  geom_beeswarm(alpha = 0.6, size = 2) +
+  labs(
+    title = "Densidad de cancelaciones: Resort Hotel",
+    subtitle = "Por depósito, segmento de mercado y tiempo de cancelación",
+    x = "Tiempo anticipado en Días", 
+    y = "Tipo de Depósito"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    legend.text = element_text(size = 9),
+    axis.text.y = element_text(angle = 45, hjust = 1, size = 8),
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5), # Centra el título
+    plot.subtitle = element_text(size = 12, hjust = 0.5) # Centra el subtítulo
+  ) +
+  scale_y_discrete(expand = expansion(mult = c(0.2, 0.2)))
+
+# Combinar ambos gráficos usando patchwork
+combined_cancel_plot <- cancel_plot_city / cancel_plot_resort + 
+  plot_annotation(
+    title = "Densidad de cancelaciones por tipo de Hotel",
+    subtitle = "Comparativa entre City Hotel y Resort Hotel",
+    theme = theme(
+      plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(size = 12, hjust = 0.5)
+    )
+  )
+
+# Mostrar el gráfico combinado
+print(combined_cancel_plot)
+```
+
+
+
+
+El Fantasma de las Cancelaciones representa uno de los mayores retos en la gestión hotelera. Los datos revelan que los segmentos OTAs y Offline TA/TO concentran la mayor densidad de cancelaciones tanto en City Hotel como en Resort Hotel, siendo particularmente sensibles las reservas con depósitos Refundable. En City Hotels, el lead time (tiempo anticipado) tiende a ser más largo, lo que aumenta la incertidumbre y dificulta cubrir habitaciones canceladas. Por otro lado, Resort Hotels, con menos reservas totales, enfrentan cancelaciones significativas en Groups, reflejando la volatilidad de los planes grupales. Las políticas de depósito No Refund logran mitigar este problema, aunque podrían disuadir a ciertos segmentos de mercado. Este análisis destaca la necesidad de equilibrar flexibilidad y seguridad financiera para reducir el impacto de las cancelaciones, un desafío constante en ambos tipos hotel.
+
+# El cliente invisible
+
+```{r}
+# Cargar las librerías necesarias
+library(ggplot2)
+library(dplyr)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+
+# Preparar los datos iniciales
+revenue_data <- hotel_bookings_1 %>%
+  filter(!is.na(country), !is.na(RevenueLost)) %>%  
+  group_by(country, hotel) %>%
+  summarise(
+    total_revenue_lost = sum(RevenueLost, na.rm = TRUE), 
+    avg_revenue_lost = mean(RevenueLost, na.rm = TRUE),  
+    .groups = "drop"
+  )
+
+# Obtener datos geográficos
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Combinar datos geográficos con ingresos perdidos
+revenue_data_geo <- world %>%
+  left_join(revenue_data, by = c("iso_a3" = "country"))
+
+# Crear gráficos para cada tipo de hotel
+hotels <- unique(revenue_data$hotel)
+plots <- lapply(hotels, function(hotel) {
+  map_data <- revenue_data_geo %>% filter(hotel == hotel)
+
+  ggplot(data = map_data) +
+    geom_sf(aes(fill = total_revenue_lost), color = "white", size = 0.2) +
+    scale_fill_gradientn(colors = c("#377eb8", "#ff7f00", "#984ea3", "#4daf4a", 
+                                    "#ffff33"),
+                         na.value = "#d3d3d3",
+                         breaks = scales::pretty_breaks(n = 5),
+                         labels = scales::comma) +
+    labs(
+      title = paste("Ingresos perdidos:", hotel),
+      fill = "Ingresos perdidos (€)",
+      subtitle = "Ingresos perdidos según la procedencia del cliente"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 14, face = "bold"),
+      plot.subtitle = element_text(size = 12),
+      legend.position = "bottom",
+      legend.text = element_text(size = 5, angle = 270),
+      legend.key.height = unit(0.5, "cm"),  
+      legend.key.width = unit(2, "cm"),     
+      legend.title = element_text(size = 10)
+    )
+})
+
+# Mostrar los gráficos para cada tipo de hotel
+for (plot in plots) {
+  print(plot)
+}
+```
+
+
+
+
+El Cliente Invisible representa el impacto de las cancelaciones segun el pais de procedencia del cliente en los ingresos hoteleros. En City Hotels, los mercados europeos generan pérdidas que superan los 5 millones de euros, reflejando la dependencia de estos hoteles de viajeros de negocios y turismo urbano. Por otro lado, Resort Hotel muestra un impacto más distribuido, con pérdidas de hasta 3 millones de euros, principalmente asociadas a viajes grupales y reservas anticipadas. Este fenómeno destac políticas de depósito y estrategias adaptadas para minimizar este impacto.a cómo las cancelaciones afectan de manera diferenciada a ambos tipos de hoteles: mientras City Hotels enfrentan la alta rotación de viajeros, Resort Hotels sufre la volatilidad de las reservas a largo plazo. Estas dinámicas resaltan la necesidad de
+
+# Las estaciones del turismo
+
+```{r}
+# Cargar las librerías necesarias
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Preparar los datos en formato largo
+violins_data <- hotel_bookings_1 %>%
+  mutate(TotalStay = stays_in_weekend_nights + stays_in_week_nights) %>%
+  select(Season, adr, TotalStay, hotel) %>%             
+  pivot_longer(
+    cols = c("adr", "TotalStay"),
+    names_to = "metric",
+    values_to = "value"
+  )
+
+# Asegurar el orden correcto de las estaciones
+violins_data$Season <- factor(
+  violins_data$Season,
+  levels = c("Winter", "Spring", "Summer", "Autumn"),
+  ordered = TRUE
+)
+
+# Crear los gráficos para cada tipo de hotel
+hotels <- unique(violins_data$hotel)
+plots <- lapply(hotels, function(hotel) {
+  # Filtrar datos por hotel
+  hotel_data <- violins_data %>% filter(hotel == hotel)
+
+  # Gráfico para ADR (violín y dispersión)
+  violin_plot_adr <- ggplot(hotel_data %>% filter(metric == "adr"), 
+                            aes(x = Season, y = value, fill = Season)) +
+    geom_violin(trim = FALSE, alpha = 0.6) +
+    geom_boxplot(width = 0.1, outlier.shape = NA, alpha = 0.8) +
+    labs(
+      title = paste("Distribución de ADR por estación -", hotel),
+      x = "Estación del año",
+      y = "ADR",
+      fill = "Estación"
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "right",
+      legend.text = element_text(size = 8),
+      plot.title = element_text(size = 12),
+      axis.text.y = element_text(size = 9)
+    )
+
+  scatter_plot_adr <- ggplot(hotel_data %>% filter(metric == "adr"), 
+                             aes(x = Season, y = value)) +
+    geom_jitter(width = 0.2, alpha = 0.5, color = "blue") +
+    labs(
+      title = "Dispersión de ADR por estación",
+      x = "Estación del año",
+      y = "ADR"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 12),
+      axis.text.y = element_text(size = 9)
+    )
+
+  # Gráfico para TotalStay (violín y dispersión)
+  violin_plot_totalstay <- ggplot(hotel_data %>% filter(metric == "TotalStay"), 
+                                  aes(x = Season, y = value, fill = Season)) +
+    geom_violin(trim = FALSE, alpha = 0.6) +
+    geom_boxplot(width = 0.1, outlier.shape = NA, alpha = 0.8) +
+    labs(
+      title = paste("Pernoctaciones estacionales -", hotel),
+      x = "Estación del Año",
+      y = "TotalStay",
+      fill = "Estación"
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = "right",
+      legend.text = element_text(size = 8),
+      plot.title = element_text(size = 12),
+      axis.text.y = element_text(size = 9)
+    )
+
+  scatter_plot_totalstay <- ggplot(hotel_data %>% filter(metric == "TotalStay"), 
+                                   aes(x = Season, y = value)) +
+    geom_jitter(width = 0.2, alpha = 0.5, color = "red") +
+    labs(
+      title = "Dispersión de pernoctaciones estacionales",
+      x = "Estación del año",
+      y = "TotalStay"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 9),
+      axis.text.y = element_text(size = 9)
+    )
+
+  # Combinar gráficos (violín y dispersión lado a lado)
+  combined_adr <- violin_plot_adr + scatter_plot_adr + plot_layout(ncol = 2)
+  combined_totalstay <- violin_plot_totalstay + scatter_plot_totalstay + 
+    plot_layout(ncol = 2)
+
+  # Combinar ADR y TotalStay uno debajo del otro
+  final_plot <- combined_adr / combined_totalstay +
+    plot_annotation(title = 
+                      paste("Distribución de ADR y pernoctación por estación -", 
+                            hotel),
+                      subtitle = "Comparativa de métricas por estaciones",
+                      theme = theme(
+                        plot.title = element_text(size = 16, face = "bold"),
+                        plot.subtitle = element_text(size = 12)
+                    ))
+  return(final_plot)
+})
+
+# Mostrar los gráficos para cada hotel
+for (plot in plots) {
+  print(plot)
+}
+```
+
+
+
+
+Las Estaciones del Turismo reflejan cómo la demanda hotelera y los ingresos diarios promedio (ADR) varían a lo largo del año, dependiendo del tipo de hotel y la temporada. En Resort Hotel, el verano destaca como la temporada de mayor actividad, con un ADR más alto y una duración de estancia significativamente mayor, mientras que el otoño muestra una caída tanto en tarifas como en estadías, sugiriendo una disminución en la demanda turística. En contraste, City Hotel presenta una dinámica más estable entre estaciones, con un ADR competitivo en ambas temporadas y estadías ligeramente más cortas, adaptadas a un público más urbano y de negocios. Estas diferencias resaltan la estacionalidad como un factor clave en la planificación estratégica, Resort Hotel aprovecha las vacaciones de verano, y City Hotel mantiene un flujo más constante de clientes. La capacidad de gestionar estas variaciones es necesaria para maximizar ingresos y optimizar recursos.
+
+# Camino hacia la personalización
+
+```{r}
+# Cargar las librerías necesarias
+library(ggplot2)
+library(dplyr)
+
+# Preparar los datos iniciales para cada hotel
+data_hotels <- hotel_bookings_1 %>%
+  group_by(hotel, total_of_special_requests, stays_in_week_nights) %>%
+  summarise(avg_adr = mean(adr), .groups = "drop")
+
+# Crear gráficos para cada hotel
+hotels <- unique(data_hotels$hotel)
+plots <- lapply(hotels, function(hotel) {
+  bubble_data <- data_hotels %>% filter(hotel == hotel)
+
+  ggplot(bubble_data, aes(x = stays_in_week_nights, y = avg_adr, size = total_of_special_requests)) +
+    geom_point(alpha = 0.7, color = "steelblue") +
+    scale_size_continuous(range = c(3, 15)) +
+    labs(
+      title = paste("Impacto de solicitudes especiales en ADR -", hotel),
+      x = "Estancias entre semana (Noches)",
+      y = "ADR Promedio",
+      size = "Solicitudes especiales"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.margin = margin(10, 10, 10, 10),
+      plot.title = element_text(size = 12),
+      legend.position = "right",
+      legend.text = element_text(size = 8),
+      legend.title = element_text(size = 10)
+    )
+})
+
+# Mostrar los gráficos para cada hotel
+for (plot in plots) {
+  print(plot)
+}
+```
+
+
+
+
+El análisis Camino hacia la personalización revela cómo las solicitudes especiales influyen en ADR y las estancias en los dos tipos de hotel. Los resultados muestran que en Resort Hotel tienen mayor variabilidad en tarifas, con un ADR que puede superar los 200€ cuando los clientes realizan múltiples solicitudes especiales, lo que refleja un enfoque en experiencias personalizadas y de alto valor agregado. En contraste, en City Hotels tienen un comportamiento más contenido, con un ADR promedio que raramente supera los 150€, evidenciando un enfoque más funcional y orientado a estancias más cortas.
+
+El tamaño de las burbujas indica el número de solicitudes especiales, revelando que la mayoría de los clientes optan por pocas personalizaciones, aunque en Resort Hotel hay una ligera tendencia hacia más solicitudes. Las estancias más largas están asociadas a menos solicitudes, destacando que las experiencias personalizadas suelen concentrarse en visitas breves. Este análisis destaca cómo la personalización no solo define el precio sino también el tipo de experiencia buscada, distinguiendo claramente las expectativas entre hotel urbano y resort.
+
+# Conclusiones
+
+* **Segmentación diferenciada:** City Hotel debe fortalecer su posición en mercados corporativos y de corto plazo, mientras que Resort Hotel debe enfocarse en maximizar las experiencias de ocio y las personalizaciones, que generan altos ingresos.
+
+* **Gestión de cancelaciones:** la dependencia de ciertos segmentos, como las agencias en línea, expone a ambos tipos de hotel a altos niveles de cancelación. Políticas más estrictas de depósitos no reembolsables y estrategias para fidelizar clientes recurrentes pueden reducir este impacto.
+
+* **Importancia de los mercados internacionales:** la mayoría de los ingresos perdidos provienen de países clave. Diseñar promociones adaptadas a estos mercados y fomentar programas de fidelidad puede ayudar a mitigar riesgos.
+
+* **Estrategias estacionales:** el verano sigue siendo la temporada de mayor rentabilidad. Promociones dirigidas al otoño podrían equilibrar la ocupación y los ingresos en períodos bajos.
+
+* **Valor de la personalización:** aunque las solicitudes especiales no son la norma, su impacto en los ingresos es significativo, especialmente en los resorts. Este enfoque debe incentivarse con ofertas exclusivas y paquetes personalizados.
+
+En resumen, la existentencia de *dos mundos* dentro del turismo hotelero exige estrategias adaptadas a las diferencias de cada segmento, maximizando las oportunidades de personalización, estacionalidad y mercado global, mientras se enfrentan desafíos estructurales como las cancelaciones.
+
+# Glosario
+
+* **ADR (Average Daily Rate):** tarifa diaria promedio, métrica clave para medir ingresos por habitación.
+
+* **Cancelaciones:** reservas anuladas antes de la fecha de entrada, afectan ingresos y planificación.
+
+* **Customization:** Personalización en servicios y tarifas, especialmente en resorts.
+
+* **Depósito No Refund:** política de depósito no reembolsable, reduce riesgos de cancelaciones.
+
+* **Estacionalidad:** variación de la demanda hotelera según la temporada del año.
+
+* **Insights:** patrones relevantes extraídos de los datos.
+
+* **Lead Time:** tiempo anticipado entre la reserva y la fecha de llegada.
+
+* **Offline TA/TO:** agencias de viaje tradicionales y operadores turísticos.
+
+* **OTA (Online Travel Agencies):** agencias de viaje en línea, canal principal de reservas.
+
+* **Packages:** ofertas que combinan múltiples servicios para mayor atractivo.
+
+* **Personalización:** ajustes específicos solicitados por clientes en su experiencia hotelera.
+
+* **Refundable:** tipo de depósito con posibilidad de reembolso.
+
+* **Reservas directas:** reservas realizadas sin intermediarios, directamente con el hotel.
+
+* **Retention Programs:** estrategias para fidelizar a clientes y aumentar su recurrencia.
+
+* **Segmentos de mercado:** categorías de clientes basadas en su origen o canal de reserva.
