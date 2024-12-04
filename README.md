@@ -1,4 +1,4 @@
-# PEC3_VISUALIZACION_STORYTELLING
+# PEC3_VISUALIZACIÓN_STORYTELLING
 StoryTelling sobre un conjunto de datos de un City Hotel (de Lisboa) y Resort Hotel (en el Algarve).
 # ENLACE VISUALIZACIÓN
 * **Interactiva**
